@@ -132,5 +132,43 @@ readSize:
  	# $a2 - width
  	# $a3 - color 
  	
+ 	# $a0 is xmin (i.e., left edge; must be within the display)
+	# $a1 is width (must be nonnegative and within the display)
+	# $a2 is ymin  (i.e., top edge, increasing down; must be within the display)
+	# $a3 is height (must be nonnegative and within the display)
+
+	beq $a1,$0,rectangleReturn # zero width: draw nothing
+	beq $a3,$zero,rectangleReturn # zero height: draw nothing
+
+	li $t0,-1 # color: white
+	la $t1,display
+	add $a2,$a2,$a0 # simplify loop tests by switching to first too-far value
+	add $a3,$a3,$a1
+	sll $a0,$a0,2 # scale x values to bytes (4 bytes per pixel)
+	sll $a2,$a2,2
+	sll $a1,$a1,11 # scale y values to bytes (512*4 bytes per display row)
+	sll $a3,$a3,11
+	addu $t2,$a1,$t1 # translate y values to display row starting addresses
+	addu $a3,$a3,$t1
+	addu $a1,$t2,$a0 # translate y values to rectangle row starting addresses
+	addu $a3,$a3,$a0
+	addu $t2,$t2,$a2 # and compute the ending address for first rectangle row
+	li $t4,0x800 # bytes per display row
+
+rectangleYloop:
+	move $t3,$a1 # pointer to current pixel for X loop; start at left edge
+
+rectangleXloop:
+	sw $t0,($t3)
+	addiu $t3,$t3,4
+	bne $t3,$t2,rectangleXloop # keep going if not past the right edge of the rectangle
+
+	addu $a1,$a1,$t4 # advace one row worth for the left edge
+	addu $t2,$t2,$t4 # and right edge pointers
+	bne $a1,$a3,rectangleYloop # keep going if not off the bottom of the rectangle
+
+rectangleReturn:
+	jr $ra
+ 	
  	
  	
