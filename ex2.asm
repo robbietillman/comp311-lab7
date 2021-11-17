@@ -73,7 +73,7 @@ readSquareColors:
 	syscall 		
  	add	$s0, $0, $v0	
  	
- 	
+ 	sll	$s0, $s0, 16		# shifting red value by 16
  	
  	addi	$v0, $0, 4  			
 	la 	$a0, greenSquarePrompt 		
@@ -82,6 +82,9 @@ readSquareColors:
 	addi	$v0, $0, 5			
 	syscall 				
  	add	$s1, $0, $v0			
+ 	
+ 	sll	$s1, $s1, 8		# shifting green value by 8
+ 	or	$s4, $s0, $s1		# or-ing
  	
  	
  	
@@ -92,11 +95,13 @@ readSquareColors:
 	addi	$v0, $0, 5		
 	syscall 			
  	add	$s2, $0, $v0	
- 	
+ 
  	#############################################
 	## Calculate square color and put in       ##
 	## appropriate register  ($a3)             ##
 	#############################################
+	
+	or	$a3, $s4, $s2		# final color is in a3
 
 readPosition:
 	addi	$v0, $0, 4  	
